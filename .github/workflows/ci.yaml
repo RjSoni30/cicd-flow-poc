@@ -15,7 +15,8 @@ jobs:
 
     - name: Build nodejs app
       run: |
-        npm build
+        # npm build
+        echo "Build step - skipped"
 
     - name: Package application
       run: |

@@ -1,0 +1,29 @@
+name: CI pipeline
+on: push
+
+jobs:
+  build:
+    name: Checkout & Build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout source-code
+      uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: |
+        npm install
+
+    - name: Build nodejs app
+      run: |
+        # npm build
+        echo "Build step - skipped"
+
+    - name: Package application
+      run: |
+        zip -r app-package.zip .
+
+    - name: upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: app-package
+        path: app-package.zip

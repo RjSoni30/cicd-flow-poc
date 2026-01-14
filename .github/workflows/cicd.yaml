@@ -1,4 +1,4 @@
-name: CI pipeline
+name: CICD pipeline
 on: 
   push:
     branches:
@@ -58,7 +58,7 @@ jobs:
 
       - name: Start application server & tunnel
         run: |
-          node ./node-app/server.js &
+          node ./node-app/src/server.js &
           npx localtunnel --port 3000 &
 
           sleep 5

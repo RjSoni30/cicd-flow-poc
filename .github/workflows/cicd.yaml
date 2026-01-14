@@ -65,9 +65,8 @@ jobs:
           echo "Application server is available on tunnel"
 
           echo "Your tunnel password is:"
-          hostname -I | awk '{print $1}'
-          # echo "Method 1: $(curl https://loca.lt/mytunnelpassword)"
-          # echo "Method 2: $(curl ifconfig.me)"
+          echo "Method 1: $(curl ifconfig.me)"
+          # echo "Method 2: $(curl https://loca.lt/mytunnelpassword)"
           # echo "Method 3: $(curl https://api.ipify.org)"
           # echo "Method 4: $(curl ipv4.icanhazip.com)"
 

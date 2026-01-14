@@ -1,4 +1,4 @@
-name: CI pipeline
+name: CICD pipeline
 on: 
   push:
     branches:
@@ -58,10 +58,16 @@ jobs:
 
       - name: Start application server & tunnel
         run: |
-          node ./node-app/server.js &
+          node ./node-app/src/server.js &
           npx localtunnel --port 3000 &
 
           sleep 5
           echo "Application server is available on tunnel"
+
+          echo "Your tunnel password is:"
+          echo "Method 1: $(curl ifconfig.me)"
+          # echo "Method 2: $(curl https://loca.lt/mytunnelpassword)"
+          # echo "Method 3: $(curl https://api.ipify.org)"
+          # echo "Method 4: $(curl ipv4.icanhazip.com)"
 
           sleep 300

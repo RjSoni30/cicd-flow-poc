@@ -64,4 +64,7 @@ jobs:
           sleep 5
           echo "Application server is available on tunnel"
 
+          echo "Your tunnel password is:"
+          curl https://loca.lt/mytunnelpassword
+
           sleep 300

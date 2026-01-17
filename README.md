@@ -1,3 +1,3 @@
 # CICD Flow POC
 
-![Alt text describing the image](resources/cicd-flow-chart.png)
+![CICD Flow Chart](resources/cicd-flow-chart.png)

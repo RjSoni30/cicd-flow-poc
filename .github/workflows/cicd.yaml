@@ -45,9 +45,10 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Sonarqube Scan
-        uses: sonarsource/sonarcloud-github-action@v7.0.0
+        uses: SonarSource/sonarqube-scan-action@v7.0.0
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: https://sonarcloud.io
 
   deploy:
     name: Deploy

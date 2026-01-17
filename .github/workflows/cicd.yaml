@@ -36,6 +36,19 @@ jobs:
         name: app-package
         path: app-package.zip
 
+  sonarqube:
+    name: Sonarqube Scan
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source-code
+        uses: actions/checkout@v4
+
+      - name: Sonarqube Scan
+        uses: sonarsource/sonarcloud-github-action@v6
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
   deploy:
     name: Deploy
     if: github.ref_name != 'master'

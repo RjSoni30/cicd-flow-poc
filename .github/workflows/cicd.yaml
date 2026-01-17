@@ -64,10 +64,7 @@ jobs:
           sleep 5
           echo "Application server is available on tunnel"
 
-          echo "Your tunnel password is:"
-          echo "Method 1: $(curl ifconfig.me)"
-          # echo "Method 2: $(curl https://loca.lt/mytunnelpassword)"
-          # echo "Method 3: $(curl https://api.ipify.org)"
-          # echo "Method 4: $(curl ipv4.icanhazip.com)"
+          echo "Your tunnel password is: $(curl ifconfig.me)"
 
           sleep 300
+          echo "Shutting down application server"

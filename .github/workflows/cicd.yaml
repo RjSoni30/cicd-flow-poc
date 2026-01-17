@@ -4,7 +4,7 @@ on:
     branches:
       - dev/**
     paths:
-      - 'server.js'
+      - 'src/server.js'
       - 'package.json'
       - 'package-lock.json'
   workflow_dispatch:
@@ -36,9 +36,23 @@ jobs:
         name: app-package
         path: app-package.zip
 
+  sonarqube:
+    name: Sonarqube Scan
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source-code
+        uses: actions/checkout@v4
+
+      - name: Sonarqube Scan
+        uses: SonarSource/sonarqube-scan-action@v7.0.0
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: https://sonarcloud.io
+
   deploy:
     name: Deploy
-    if: github.ref_name != 'master'
+    if: github.ref_name == 'master'
     needs: build
     runs-on: ubuntu-latest
     steps:

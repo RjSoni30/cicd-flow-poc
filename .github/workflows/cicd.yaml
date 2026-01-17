@@ -51,7 +51,7 @@ jobs:
 
   deploy:
     name: Deploy
-    if: github.ref_name != 'master'
+    if: github.ref_name == 'master'
     needs: build
     runs-on: ubuntu-latest
     steps:

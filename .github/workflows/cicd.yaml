@@ -90,7 +90,9 @@ jobs:
 
           # npx bore-node local 3000 --to bore.pub &
 
-          ssh -o StrictHostKeyChecking=no -R 80:localhost:3000 serveo.net &
+          # ssh -o StrictHostKeyChecking=no -R 80:localhost:3000 serveo.net &
+
+          ssh -p 443 -o StrictHostKeyChecking=no -R0:localhost:3000 a.pinggy.io &
 
           sleep 5
           echo "Application server is available on tunnel"

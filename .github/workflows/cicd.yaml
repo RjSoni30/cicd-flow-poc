@@ -6,7 +6,6 @@ on:
     paths:
       - 'src/server.js'
       - 'package.json'
-      - 'package-lock.json'
   workflow_dispatch:
 
 jobs:
@@ -50,9 +49,20 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: https://sonarcloud.io
 
+  sca-scan:
+    name: SCA Scan
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: SCA Scan using Anchore Grype Scan
+        uses: anchore/scan-action@v6
+        with:
+          path: "."
+          output-format: "table"
+
   deploy:
     name: Deploy
-    if: github.ref_name == 'master'
+    # if: github.ref_name == 'master'
     needs: build
     runs-on: ubuntu-latest
     steps:
@@ -82,3 +92,8 @@ jobs:
 
           sleep 120
           echo "Shutting down application server"
+
+      - name: Run DAST Scan using zaproxy
+        uses: zaproxy/action-baseline@v0.15.0
+        with:
+          target: 'http://localhost:3000/'

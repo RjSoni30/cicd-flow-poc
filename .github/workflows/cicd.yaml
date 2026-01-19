@@ -83,20 +83,16 @@ jobs:
         with:
           node-version: '20'
 
-      - name: install tunneling package
-        run: |
-          npm install -g bore-node
-
       - name: Start application server & expose to internet
         run: |
           node ./node-app/src/server.js &
           # npx localtunnel --port 3000 &
-          # echo "Your tunnel password is: $(curl ifconfig.me)"
 
-          bore local 3000 --to bore.pub &
+          npx bore-node local 3000 --to bore.pub &
 
           sleep 5
           echo "Application server is available on tunnel"
+          echo "GitHub Runner's public IP: $(curl ifconfig.me)"
 
           sleep 120
           echo "Shutting down application server"

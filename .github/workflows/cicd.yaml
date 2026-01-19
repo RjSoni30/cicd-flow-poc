@@ -88,7 +88,9 @@ jobs:
           node ./node-app/src/server.js &
           # npx localtunnel --port 3000 &
 
-          npx bore-node local 3000 --to bore.pub &
+          # npx bore-node local 3000 --to bore.pub &
+
+          ssh -o StrictHostKeyChecking=no -R 80:localhost:3000 serveo.net &
 
           sleep 5
           echo "Application server is available on tunnel"

@@ -128,4 +128,5 @@ jobs:
         uses: zaproxy/action-baseline@v0.15.0
         with:
           target: ${{ env.public_forwarding_url }}
-          token: ${{ secrets.AUTOMATION_GITHUB_TOKEN }}
+          # token: ${{ secrets.AUTOMATION_GITHUB_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN}}

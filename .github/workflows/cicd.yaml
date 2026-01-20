@@ -68,6 +68,8 @@ jobs:
     # if: github.ref_name == 'master'
     needs: build
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
     steps:
       - name: download application package
         uses: actions/download-artifact@v4

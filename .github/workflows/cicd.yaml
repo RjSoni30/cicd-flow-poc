@@ -118,18 +118,14 @@ jobs:
           node ./node-app/src/server.js &
           ngrok http 3000 &
           sleep 10
-          curl -s http://localhost:4040/api/tunnels | jq '.tunnels[0].public_url'
-          sleep 120
-          echo "Shutting down application server and ngrok"
+          public_forwarding_url=$(curl -s http://localhost:4040/api/tunnels | jq '.tunnels[0].public_url')
+          echo "public_forwarding_url=$public_forwarding_url" >> $GITHUB_ENV
+          echo "Application server is available on ngrok tunnel: $public_forwarding_url"
+          # sleep 120
+          # echo "Shutting down application server and ngrok"
 
-
-  # dast-scan:
-  #   name: DAST Scan
-  #   needs: deploy
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Run DAST Scan using zaproxy
-  #       uses: zaproxy/action-baseline@v0.15.0
-  #       with:
-  #         target: 'http://localhost:3000/'
-  #         token: ${{ secrets.AUTOMATION_GITHUB_TOKEN }}
+      - name: Run DAST Scan using zaproxy
+        uses: zaproxy/action-baseline@v0.15.0
+        with:
+          target: ${{ env.public_forwarding_url }}
+          token: ${{ secrets.AUTOMATION_GITHUB_TOKEN }}

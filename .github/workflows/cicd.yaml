@@ -35,37 +35,37 @@ jobs:
         name: app-package
         path: app-package.zip
 
-  # sonarqube:
-  #   name: Sonarqube Scan
-  #   needs: build
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkout source-code
-  #       uses: actions/checkout@v4
+  sonarqube:
+    name: Sonarqube Scan
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source-code
+        uses: actions/checkout@v4
 
-  #     - name: Sonarqube Scan
-  #       uses: SonarSource/sonarqube-scan-action@v7.0.0
-  #       env:
-  #         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-  #         SONAR_HOST_URL: https://sonarcloud.io
+      - name: Sonarqube Scan
+        uses: SonarSource/sonarqube-scan-action@v7.0.0
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: https://sonarcloud.io
 
-  # sca-scan:
-  #   name: SCA Scan
-  #   needs: build
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkout source-code
-  #       uses: actions/checkout@v4
+  sca-scan:
+    name: SCA Scan
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source-code
+        uses: actions/checkout@v4
 
-  #     - name: SCA Scan using Anchore Grype Scan
-  #       uses: anchore/scan-action@v6
-  #       with:
-  #         path: "."
-  #         output-format: "table"
+      - name: SCA Scan using Anchore Grype Scan
+        uses: anchore/scan-action@v6
+        with:
+          path: "."
+          output-format: "table"
 
   deploy:
     name: Deploy
-    # if: github.ref_name == 'master'
+    if: github.ref_name == 'master'
     needs: build
     runs-on: ubuntu-latest
     permissions:
@@ -85,24 +85,6 @@ jobs:
         with:
           node-version: '20'
 
-      # - name: Start application server & expose to internet
-      #   run: |
-      #     # node ./node-app/src/server.js &
-      #     # npx localtunnel --port 3000 &
-
-      #     # npx bore-node local 3000 --to bore.pub &
-
-      #     # ssh -o StrictHostKeyChecking=no -R 80:localhost:3000 serveo.net &
-
-      #     # ssh -p 443 -o StrictHostKeyChecking=no -R0:localhost:3000 a.pinggy.io &
-
-      #     # sleep 5
-      #     # echo "Application server is available on tunnel"
-      #     # echo "GitHub Runner's public IP: $(curl ifconfig.me)"
-
-      #     # sleep 120
-      #     # echo "Shutting down application server"
-
       - name: Install ngrok
         run: |
           curl -s https://ngrok-agent.s3.amazonaws.com/ngrok.asc | \
@@ -118,17 +100,21 @@ jobs:
       - name: Start application server & ngrok tunnel
         run: |
           node ./node-app/src/server.js &
+
           ngrok http 3000 &
           sleep 10
+
           public_forwarding_url=$(curl -s http://localhost:4040/api/tunnels | jq '.tunnels[0].public_url')
           echo "public_forwarding_url=$public_forwarding_url" >> $GITHUB_ENV
           echo "Application server is available on ngrok tunnel: $public_forwarding_url"
-          # sleep 120
-          # echo "Shutting down application server and ngrok"
 
       - name: Run DAST Scan using zaproxy
         uses: zaproxy/action-baseline@v0.15.0
         with:
           target: ${{ env.public_forwarding_url }}
-          # token: ${{ secrets.AUTOMATION_GITHUB_TOKEN }}
-          token: ${{ secrets.GITHUB_TOKEN}}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Shutdown application server with 2 min wait time
+        run: |
+          sleep 120
+          echo "Shutting down application server and ngrok"

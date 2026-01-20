@@ -83,23 +83,45 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Start application server & expose to internet
+      # - name: Start application server & expose to internet
+      #   run: |
+      #     # node ./node-app/src/server.js &
+      #     # npx localtunnel --port 3000 &
+
+      #     # npx bore-node local 3000 --to bore.pub &
+
+      #     # ssh -o StrictHostKeyChecking=no -R 80:localhost:3000 serveo.net &
+
+      #     # ssh -p 443 -o StrictHostKeyChecking=no -R0:localhost:3000 a.pinggy.io &
+
+      #     # sleep 5
+      #     # echo "Application server is available on tunnel"
+      #     # echo "GitHub Runner's public IP: $(curl ifconfig.me)"
+
+      #     # sleep 120
+      #     # echo "Shutting down application server"
+
+      - name: Install ngrok
+        run: |
+          curl -s https://ngrok-agent.s3.amazonaws.com/ngrok.asc | \
+          sudo tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null
+          echo "deb https://ngrok-agent.s3.amazonaws.com buster main" | \
+          sudo tee /etc/apt/sources.list.d/ngrok.list
+          sudo apt update && sudo apt install ngrok
+
+      - name: Authenticate ngrok
+        run: |
+          ngrok config add-authtoken ${{ secrets.NGROK_AUTH_TOKEN }}
+
+      - name: Start application server & ngrok tunnel
         run: |
           node ./node-app/src/server.js &
-          # npx localtunnel --port 3000 &
-
-          # npx bore-node local 3000 --to bore.pub &
-
-          # ssh -o StrictHostKeyChecking=no -R 80:localhost:3000 serveo.net &
-
-          ssh -p 443 -o StrictHostKeyChecking=no -R0:localhost:3000 a.pinggy.io &
-
-          sleep 5
-          echo "Application server is available on tunnel"
-          echo "GitHub Runner's public IP: $(curl ifconfig.me)"
-
+          ngrok http 3000 &
+          sleep 10
+          curl -s http://localhost:4040/api/tunnels | jq '.tunnels[0].public_url'
           sleep 120
-          echo "Shutting down application server"
+          echo "Shutting down application server and ngrok"
+
 
   # dast-scan:
   #   name: DAST Scan

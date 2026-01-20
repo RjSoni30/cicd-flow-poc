@@ -116,7 +116,7 @@ jobs:
       - name: Start application server & ngrok tunnel
         run: |
           node ./node-app/src/server.js &
-          ngrok http 3000 &
+          ngrok http 3000 --log=stdout --web-addr=false &
           sleep 10
           curl -s http://localhost:4040/api/tunnels | jq '.tunnels[0].public_url'
           sleep 120

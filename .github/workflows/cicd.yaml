@@ -6,7 +6,6 @@ on:
     paths:
       - 'src/server.js'
       - 'package.json'
-      - 'package-lock.json'
   workflow_dispatch:
 
 jobs:
@@ -50,11 +49,27 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: https://sonarcloud.io
 
+  sca-scan:
+    name: SCA Scan
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source-code
+        uses: actions/checkout@v4
+
+      - name: SCA Scan using Anchore Grype Scan
+        uses: anchore/scan-action@v6
+        with:
+          path: "."
+          output-format: "table"
+
   deploy:
     name: Deploy
     if: github.ref_name == 'master'
     needs: build
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
     steps:
       - name: download application package
         uses: actions/download-artifact@v4
@@ -70,15 +85,36 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Start application server & tunnel
+      - name: Install ngrok
+        run: |
+          curl -s https://ngrok-agent.s3.amazonaws.com/ngrok.asc | \
+          sudo tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null
+          echo "deb https://ngrok-agent.s3.amazonaws.com buster main" | \
+          sudo tee /etc/apt/sources.list.d/ngrok.list
+          sudo apt update && sudo apt install ngrok
+
+      - name: Authenticate ngrok
+        run: |
+          ngrok config add-authtoken ${{ secrets.NGROK_AUTH_TOKEN }}
+
+      - name: Start application server & ngrok tunnel
         run: |
           node ./node-app/src/server.js &
-          npx localtunnel --port 3000 &
 
-          sleep 5
-          echo "Application server is available on tunnel"
+          ngrok http 3000 &
+          sleep 10
 
-          echo "Your tunnel password is: $(curl ifconfig.me)"
+          public_forwarding_url=$(curl -s http://localhost:4040/api/tunnels | jq '.tunnels[0].public_url')
+          echo "public_forwarding_url=$public_forwarding_url" >> $GITHUB_ENV
+          echo "Application server is available on ngrok tunnel: $public_forwarding_url"
 
+      - name: Run DAST Scan using zaproxy
+        uses: zaproxy/action-baseline@v0.15.0
+        with:
+          target: ${{ env.public_forwarding_url }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Shutdown application server with 2 min wait time
+        run: |
           sleep 120
-          echo "Shutting down application server"
+          echo "Shutting down application server and ngrok"
